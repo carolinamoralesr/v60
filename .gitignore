@@ -1,0 +1,22 @@
+# Entorno virtual
+venv/
+
+# Bytecode de Python
+__pycache__/
+*.py[cod]
+
+# Base de datos local
+db.sqlite3
+
+# Archivos subidos por el usuario en desarrollo
+# (las fotos del catálogo se versionan, el resto no)
+media/*
+!media/cafes/
+
+# Sistema operativo y editores
+.DS_Store
+.idea/
+.vscode/
+
+# Variables de entorno locales (se versiona solo .env.example)
+.env

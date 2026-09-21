@@ -1,0 +1,63 @@
+{% comment %}
+Boleta colgada del hilo: resumen del café y de su primera receta.
+Toda la boleta es un botón que abre el modal con el detalle técnico.
+
+Parámetros: cafe (objeto Cafe).
+{% endcomment %}
+<div class="colgante">
+    <svg class="pinza" viewBox="0 0 24 40" aria-hidden="true">
+        <path class="trazo" d="M8 5 c0 -3 8 -3 8 0 v27 c0 3 -8 3 -8 0 Z"/>
+        <path class="trazo trazo--fino" d="M12 7 v25"/>
+        <circle class="trazo" cx="12" cy="17" r="3.2"/>
+    </svg>
+
+    <article class="boleta" role="button" tabindex="0"
+             data-abrir="receta-{{ cafe.id }}"
+             aria-label="Ver receta V60 de {{ cafe.nombre }}">
+
+        <div class="boleta__dentado boleta__dentado--arriba"></div>
+
+        <div class="boleta__hoja">
+            <p class="boleta__marca">{{ cafe.tostador }}</p>
+            <p class="boleta__sub">Hario V60 · Boleta de barra</p>
+
+            <hr class="corte">
+
+            {% include 'cafes/partials/_linea.html' with clave="Lote" valor=cafe.nombre only %}
+            {% include 'cafes/partials/_linea.html' with clave="Origen" valor=cafe.origen only %}
+
+            <hr class="corte">
+
+            {% with primera=cafe.recetas.first total=cafe.recetas.all|length %}
+                {% if primera %}
+                    <p class="bloque__titulo">Receta de {{ primera.autor }}</p>
+
+                    {% include 'cafes/partials/_linea.html' with clave="Dosis" valor=primera.gramos_cafe unidad="g" destacada=True only %}
+                    {% include 'cafes/partials/_linea.html' with clave="Agua" valor=primera.agua_total unidad="ml" only %}
+                    {% include 'cafes/partials/_linea.html' with clave="Ratio" valor=primera.ratio only %}
+                    {% include 'cafes/partials/_linea.html' with clave="Temp." valor=primera.temperatura unidad="°C" only %}
+                    {% include 'cafes/partials/_linea.html' with clave="Tiempo" valor=primera.tiempo_total only %}
+
+                    {% if total > 1 %}
+                        <p class="boleta__sub" style="margin-top: 0.7rem;">
+                            + {{ total|add:"-1" }} receta{{ total|add:"-1"|pluralize }} más en la boleta
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p class="vacio">
+                        Aún no hay recetas para este grano.<br>
+                        ¡Sé el primero en experimentar!
+                    </p>
+                {% endif %}
+            {% endwith %}
+
+            <div class="barras" aria-hidden="true"></div>
+            <p class="boleta__pie">Detalle técnico completo</p>
+            <p class="boleta__llamado">clic para abrir la boleta</p>
+        </div>
+
+        <div class="boleta__dentado"></div>
+
+        {% include 'cafes/partials/_polaroid.html' with cafe=cafe pie=cafe.tostador only %}
+    </article>
+</div>

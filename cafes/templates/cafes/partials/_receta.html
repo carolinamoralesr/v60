@@ -1,0 +1,36 @@
+{% comment %}
+Bloque técnico completo de una receta V60 dentro de la boleta del modal.
+
+Parámetros: receta (objeto Receta), numero (posición en el listado).
+{% endcomment %}
+<p class="bloque__titulo">Receta {{ numero }} · {{ receta.autor }}</p>
+
+{% include 'cafes/partials/_linea.html' with clave="Dosis" valor=receta.gramos_cafe unidad="g" destacada=True only %}
+{% include 'cafes/partials/_linea.html' with clave="Agua total" valor=receta.agua_total unidad="ml" only %}
+{% include 'cafes/partials/_linea.html' with clave="Ratio" valor=receta.ratio only %}
+{% include 'cafes/partials/_linea.html' with clave="Ratio real" valor=receta.ratio_calculado only %}
+{% include 'cafes/partials/_linea.html' with clave="Temperatura" valor=receta.temperatura unidad="°C" only %}
+
+<hr class="corte">
+
+{% include 'cafes/partials/_linea.html' with clave="Molienda" valor=receta.molienda only %}
+{% include 'cafes/partials/_linea.html' with clave="Molino" valor=receta.molino only %}
+{% include 'cafes/partials/_linea.html' with clave="Clicks" valor=receta.clicks_molino only %}
+
+<hr class="corte">
+
+{% include 'cafes/partials/_linea.html' with clave="Bloom agua" valor=receta.bloom_agua unidad="g" only %}
+{% include 'cafes/partials/_linea.html' with clave="Bloom tiempo" valor=receta.bloom_segundos unidad="s" only %}
+
+{% if receta.vertidos %}
+    <p class="vertidos">
+        VERTIDOS<br>
+        {{ receta.vertidos }}
+    </p>
+{% else %}
+    <p class="vertidos">VERTIDOS<br>Sin etapas registradas.</p>
+{% endif %}
+
+<div style="margin-top: 0.7rem;">
+    {% include 'cafes/partials/_linea.html' with clave="Tiempo total" valor=receta.tiempo_total destacada=True only %}
+</div>

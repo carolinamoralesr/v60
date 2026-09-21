@@ -1,0 +1,185 @@
+[
+  {
+    "model": "cafes.cafe",
+    "pk": 1,
+    "fields": {
+      "nombre": "Bourbon Chiroso Finca La Betania",
+      "tostador": "Holaste! Speciality Coffee",
+      "origen": "Palestina, Huila, Colombia",
+      "imagen": "cafes/holaste-bourbon-chiroso.jpg"
+    }
+  },
+  {
+    "model": "cafes.cafe",
+    "pk": 2,
+    "fields": {
+      "nombre": "Yirgacheffe Heirloom",
+      "tostador": "Eco Mapu Coffee",
+      "origen": "Yirgacheffe, Etiopía",
+      "imagen": "cafes/ecomapu-yirgacheffe.jpg"
+    }
+  },
+  {
+    "model": "cafes.cafe",
+    "pk": 3,
+    "fields": {
+      "nombre": "Castillo Huila",
+      "tostador": "Wake Up Coffee Lab",
+      "origen": "Huila, Colombia",
+      "imagen": "cafes/wakeup-castillo-huila.jpg"
+    }
+  },
+  {
+    "model": "cafes.cafe",
+    "pk": 4,
+    "fields": {
+      "nombre": "Anacafé 14",
+      "tostador": "Café Micelio",
+      "origen": "Coatepec, Veracruz, México",
+      "imagen": "cafes/micelio-anacafe14.jpg"
+    }
+  },
+  {
+    "model": "cafes.cafe",
+    "pk": 5,
+    "fields": {
+      "nombre": "Bourbon Huehuetenango",
+      "tostador": "Café Folks",
+      "origen": "Huehuetenango, Guatemala",
+      "imagen": "cafes/folks-huehuetenango.jpg"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 1,
+    "fields": {
+      "cafe": 1,
+      "autor": "Michael Torres",
+      "molienda": "Media (sal gruesa)",
+      "temperatura": 93,
+      "ratio": "1:16",
+      "gramos_cafe": "15.0",
+      "agua_total": 240,
+      "molino": "Comandante C40",
+      "clicks_molino": 26,
+      "bloom_agua": 45,
+      "bloom_segundos": 40,
+      "vertidos": "0:00 45g, 0:40 140g, 1:20 240g",
+      "tiempo_total": "2:50"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 2,
+    "fields": {
+      "cafe": 2,
+      "autor": "Cristián Cariman",
+      "molienda": "Media-gruesa (floral)",
+      "temperatura": 92,
+      "ratio": "1:17",
+      "gramos_cafe": "14.0",
+      "agua_total": 238,
+      "molino": "Comandante C40",
+      "clicks_molino": 28,
+      "bloom_agua": 42,
+      "bloom_segundos": 45,
+      "vertidos": "0:00 42g, 0:45 140g, 1:25 238g",
+      "tiempo_total": "3:05"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 3,
+    "fields": {
+      "cafe": 3,
+      "autor": "Victoria Sandoval",
+      "molienda": "Media (azúcar moreno)",
+      "temperatura": 90,
+      "ratio": "1:15",
+      "gramos_cafe": "20.0",
+      "agua_total": 300,
+      "molino": "Timemore Chestnut C2",
+      "clicks_molino": 20,
+      "bloom_agua": 60,
+      "bloom_segundos": 35,
+      "vertidos": "0:00 60g, 0:35 180g, 1:20 300g",
+      "tiempo_total": "3:15"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 4,
+    "fields": {
+      "cafe": 4,
+      "autor": "Franky Silva",
+      "molienda": "Media-fina (arena fina)",
+      "temperatura": 91,
+      "ratio": "1:15",
+      "gramos_cafe": "18.0",
+      "agua_total": 270,
+      "molino": "Timemore Chestnut C2",
+      "clicks_molino": 18,
+      "bloom_agua": 54,
+      "bloom_segundos": 30,
+      "vertidos": "0:00 54g, 0:30 160g, 1:10 270g",
+      "tiempo_total": "2:55"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 5,
+    "fields": {
+      "cafe": 5,
+      "autor": "Isidora Cornejo",
+      "molienda": "Media-fina (sal de mar)",
+      "temperatura": 94,
+      "ratio": "1:16",
+      "gramos_cafe": "15.0",
+      "agua_total": 240,
+      "molino": "Comandante C40",
+      "clicks_molino": 24,
+      "bloom_agua": 45,
+      "bloom_segundos": 30,
+      "vertidos": "0:00 45g, 0:30 150g, 1:05 240g",
+      "tiempo_total": "2:40"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 6,
+    "fields": {
+      "cafe": 1,
+      "autor": "Javiera Muñoz",
+      "molienda": "Media-gruesa (arena de playa)",
+      "temperatura": 94,
+      "ratio": "1:15",
+      "gramos_cafe": "16.0",
+      "agua_total": 240,
+      "molino": "1Zpresso JX-Pro",
+      "clicks_molino": 32,
+      "bloom_agua": 48,
+      "bloom_segundos": 35,
+      "vertidos": "0:00 48g, 0:35 120g, 1:10 180g, 1:45 240g",
+      "tiempo_total": "3:10"
+    }
+  },
+  {
+    "model": "cafes.receta",
+    "pk": 7,
+    "fields": {
+      "cafe": 3,
+      "autor": "Diego Paredes",
+      "molienda": "Gruesa (sal de roca)",
+      "temperatura": 88,
+      "ratio": "1:16",
+      "gramos_cafe": "17.0",
+      "agua_total": 272,
+      "molino": "Comandante C40",
+      "clicks_molino": 30,
+      "bloom_agua": 51,
+      "bloom_segundos": 45,
+      "vertidos": "0:00 51g, 0:45 160g, 1:30 272g",
+      "tiempo_total": "3:25"
+    }
+  }
+]

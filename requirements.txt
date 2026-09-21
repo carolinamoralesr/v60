@@ -1,0 +1,7 @@
+# Dependencias directas del proyecto.
+# asgiref y sqlparse no se listan: pip los instala solos como dependencias
+# internas de Django.
+
+Django==6.1.1
+Pillow==12.3.0
+python-decouple==3.8

@@ -1,0 +1,29 @@
+{% comment %}
+Fotografía Polaroid del envase. Se usa tanto en la boleta del carrusel como
+dentro del modal.
+
+Parámetros:
+  cafe      objeto Cafe.
+  pie       texto manuscrito bajo la foto.
+  ampliable (opcional) si es True, la foto recibe foco y se amplía al centro.
+{% endcomment %}
+<figure class="polaroid{% if ampliable %} polaroid--zoom{% endif %}"
+        {% if ampliable %}tabindex="0" aria-label="Foto de {{ cafe.nombre }}. Clic para ampliar."{% endif %}>
+
+    {% if cafe.imagen %}
+        <img src="{{ cafe.imagen.url }}" alt="Envase de {{ cafe.nombre }} de {{ cafe.tostador }}">
+    {% else %}
+        {# Sin fotografía cargada: se dibuja una bolsa de café en line-art. #}
+        <svg viewBox="0 0 120 100" role="img" aria-label="Sin fotografía disponible">
+            <path class="trazo" d="M42 30 h36 l6 44 c1 6 -3 10 -9 10 H45 c-6 0 -10 -4 -9 -10 Z"/>
+            <path class="trazo" d="M42 30 c0 -8 6 -12 18 -12 s18 4 18 12"/>
+            <path class="trazo trazo--fino" d="M40 48 h40"/>
+            <ellipse class="trazo trazo--fino" cx="60" cy="62" rx="11" ry="7"/>
+            <path class="trazo trazo--fino" d="M51 59 q9 6 18 0"/>
+        </svg>
+    {% endif %}
+
+    <figcaption class="polaroid__pie">{{ pie }}</figcaption>
+
+    {% if ampliable %}<p class="polaroid__ayuda">Clic fuera para cerrar</p>{% endif %}
+</figure>

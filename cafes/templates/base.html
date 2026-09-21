@@ -1,0 +1,757 @@
+{% comment %}
+Plantilla base del proyecto (capa Vista del MVC / Template del MVT).
+Concentra el <head>, la hoja de estilos y la estructura común; cada página
+solo rellena los bloques que necesita.
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Catálogo V60{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================
+           TOKENS
+           Organic Hand es comercial (Creative Market): se usa si está
+           instalada y si no cae en Caveat, semi-script equivalente.
+           ========================================================== */
+        :root {
+            --tinta: #2b1a10;
+            --tinta-suave: rgba(43, 26, 16, 0.55);
+            --papel: #fdfaf3;
+            --linea: rgba(43, 26, 16, 0.22);
+
+            --ladrillo: #a13a1e;
+            --cielo: #88b8ce;
+
+            --titulo: 'Organic Hand', 'Caveat', 'Segoe Script', cursive;
+            --texto: 'Work Sans', 'Avenir Next', 'Segoe UI', sans-serif;
+            --mono: 'Courier New', Courier, monospace;
+        }
+
+        *,
+        *::before,
+        *::after { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            padding: 0 clamp(1rem, 4vw, 3rem) 6rem;
+            background-color: var(--papel);
+            color: var(--tinta);
+            font-family: var(--texto);
+            font-weight: 300;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.sin-scroll { overflow: hidden; }
+
+        .seccion { max-width: 1160px; margin: 0 auto; }
+
+        .seccion__rotulo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--tinta-suave);
+        }
+
+        .seccion__rotulo::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: var(--linea);
+        }
+
+        .seccion__titulo {
+            margin: 0 0 2.5rem;
+            font-family: var(--titulo);
+            font-size: clamp(2.4rem, 6vw, 3.6rem);
+            font-weight: 700;
+            line-height: 1.05;
+        }
+
+        /* ==========================================================
+           1. HERO + ESCENA ANIMADA
+           ========================================================== */
+
+        .hero {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 6vw, 4rem);
+            text-align: center;
+        }
+
+        .hero__kicker {
+            margin: 0 0 1.2rem;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--tinta-suave);
+        }
+
+        .hero__titulo {
+            margin: 0;
+            font-family: var(--titulo);
+            font-size: clamp(3rem, 11vw, 7rem);
+            font-weight: 700;
+            line-height: 0.95;
+        }
+
+        .hero__bajada {
+            max-width: 52ch;
+            margin: 1.4rem auto 0;
+            font-size: clamp(0.98rem, 2vw, 1.1rem);
+            color: var(--tinta-suave);
+        }
+
+        .escena {
+            display: block;
+            width: min(100%, 620px);
+            height: auto;
+            margin: clamp(1rem, 4vw, 2.5rem) auto 0;
+        }
+
+        /* Trazo line-art: sin relleno, solo contorno */
+        .trazo {
+            fill: none;
+            stroke: var(--tinta);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .trazo--fino { stroke-width: 1.2; opacity: 0.45; }
+        .trazo--acento { stroke: var(--ladrillo); }
+        .trazo--agua { stroke: var(--cielo); stroke-width: 2.4; }
+
+        /* Inclinación de la tetera (el chorro viaja con ella) */
+        .tetera {
+            transform-box: fill-box;
+            transform-origin: 24% 100%;
+            animation: inclinar 4.5s ease-in-out infinite;
+        }
+
+        @keyframes inclinar {
+            0%, 100% { transform: rotate(-2deg); }
+            50%      { transform: rotate(-5.5deg); }
+        }
+
+        /* Línea punteada que simula la caída del agua */
+        .chorro {
+            stroke-dasharray: 5 9;
+            animation: caer 0.85s linear infinite;
+        }
+
+        @keyframes caer {
+            to { stroke-dashoffset: -14; }
+        }
+
+        .goteo {
+            stroke-dasharray: 3 11;
+            animation: caer 2.2s linear infinite;
+        }
+
+        .vapor {
+            transform-box: fill-box;
+            opacity: 0;
+            animation: vapor 4s ease-in-out infinite;
+        }
+
+        .vapor--b { animation-delay: 1.4s; }
+
+        @keyframes vapor {
+            0%   { opacity: 0; transform: translateY(6px) scaleY(0.9); }
+            45%  { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-12px) scaleY(1.1); }
+        }
+
+        /* ==========================================================
+           2. PROTOCOLO V60
+           ========================================================== */
+
+        .guia { margin-top: clamp(3rem, 8vw, 5rem); }
+
+        .pasos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: clamp(1rem, 2.5vw, 1.8rem);
+        }
+
+        .paso {
+            padding: 1.6rem 1.4rem;
+            border: 1px solid var(--linea);
+            border-radius: 18px;
+            background-color: #fff;
+        }
+
+        .paso__icono {
+            display: block;
+            width: 66px;
+            height: 66px;
+            margin: 0 auto 1rem;
+        }
+
+        .paso__numero {
+            margin: 0;
+            font-size: 0.68rem;
+            letter-spacing: 0.24em;
+            text-align: center;
+            text-transform: uppercase;
+            color: var(--tinta-suave);
+        }
+
+        .paso__nombre {
+            margin: 0 0 0.8rem;
+            font-family: var(--titulo);
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .paso__texto {
+            margin: 0;
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--tinta-suave);
+        }
+
+        /* ==========================================================
+           3. BUSCADOR (formulario HTTP GET)
+           ========================================================== */
+
+        .buscador {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.7rem;
+            margin: -1.4rem 0 0.4rem;
+        }
+
+        .buscador__campo {
+            flex: 1 1 240px;
+            min-width: 0;
+            padding: 0.62rem 1rem;
+            border: 1.5px solid var(--linea);
+            border-radius: 999px;
+            background-color: #fff;
+            color: var(--tinta);
+            font-family: var(--texto);
+            font-size: 0.9rem;
+        }
+
+        .buscador__campo:focus {
+            border-color: var(--tinta);
+            outline: none;
+        }
+
+        .buscador__boton,
+        .buscador__limpiar {
+            padding: 0.62rem 1.3rem;
+            border: 1.5px solid var(--tinta);
+            border-radius: 999px;
+            background-color: transparent;
+            color: var(--tinta);
+            font-family: var(--texto);
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .buscador__boton:hover,
+        .buscador__limpiar:hover {
+            background-color: var(--tinta);
+            color: var(--papel);
+        }
+
+        .buscador__limpiar { border-style: dashed; }
+
+        .buscador__resumen {
+            margin: 0;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            color: var(--tinta-suave);
+        }
+
+        /* ==========================================================
+           4. TENDEDERO + CARRUSEL DE BOLETAS
+           ========================================================== */
+
+        .catalogo { margin-top: clamp(3.5rem, 9vw, 6rem); }
+
+        .tendedero { position: relative; }
+
+        /* Nudos de la cuerda en los extremos */
+        .tendedero::before,
+        .tendedero::after {
+            content: "";
+            position: absolute;
+            top: 26px;
+            width: 9px;
+            height: 9px;
+            border: 1.5px solid var(--tinta);
+            border-radius: 50%;
+            background-color: var(--papel);
+            z-index: 2;
+        }
+
+        .tendedero::before { left: -2px; }
+        .tendedero::after { right: -2px; }
+
+        .hilo {
+            position: absolute;
+            top: 22px;
+            left: 0;
+            width: 100%;
+            height: 24px;
+            pointer-events: none;
+        }
+
+        .cuerda {
+            fill: none;
+            stroke: var(--tinta);
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        .carrusel {
+            display: flex;
+            gap: clamp(1.6rem, 4vw, 2.8rem);
+            overflow-x: auto;
+            padding: 2.4rem 0.4rem 5.5rem;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--linea) transparent;
+        }
+
+        .carrusel::-webkit-scrollbar { height: 6px; }
+        .carrusel::-webkit-scrollbar-thumb { background-color: var(--linea); border-radius: 999px; }
+
+        .colgante {
+            position: relative;
+            flex: 0 0 clamp(270px, 78vw, 320px);
+            padding-top: 16px;
+            scroll-snap-align: center;
+        }
+
+        .colgante:nth-child(odd) { transform: rotate(-1.1deg); }
+        .colgante:nth-child(even) { transform: rotate(1.3deg); }
+
+        .pinza {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            z-index: 3;
+            width: 22px;
+            height: 40px;
+            margin-left: -11px;
+        }
+
+        /* ---------- Boleta colgada ---------- */
+
+        .boleta {
+            position: relative;
+            padding-bottom: 54px;      /* espacio para la Polaroid */
+            cursor: pointer;
+            transform-origin: top center;
+            transition: filter 0.25s ease;
+        }
+
+        .boleta:hover,
+        .boleta:focus-visible {
+            outline: none;
+            animation: columpio 2.6s ease-in-out infinite;
+            filter: drop-shadow(0 16px 20px rgba(43, 26, 16, 0.16));
+        }
+
+        .boleta:focus-visible .boleta__hoja { outline: 2px dashed var(--ladrillo); outline-offset: 4px; }
+
+        @keyframes columpio {
+            0%, 100% { transform: rotate(-1.3deg); }
+            50%      { transform: rotate(1.3deg); }
+        }
+
+        .boleta__dentado {
+            height: 12px;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #ffffff 50%),
+                linear-gradient(-45deg, transparent 50%, #ffffff 50%);
+            background-size: 12px 12px;
+            background-repeat: repeat-x;
+            filter: drop-shadow(0 5px 6px rgba(43, 26, 16, 0.10));
+        }
+
+        .boleta__dentado--arriba { transform: rotate(180deg); }
+
+        .boleta__hoja {
+            padding: 1.5rem 1.4rem 1.2rem;
+            background-color: #ffffff;
+            color: #000000;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 22px rgba(43, 26, 16, 0.12);
+        }
+
+        .boleta__marca {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .boleta__sub {
+            margin: 0.2rem 0 0;
+            font-size: 0.66rem;
+            letter-spacing: 0.2em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .corte {
+            height: 0;
+            margin: 0.8rem 0;
+            border: 0;
+            border-bottom: 1px dashed black;
+        }
+
+        .corte--doble { border-bottom-style: double; border-bottom-width: 3px; }
+
+        .linea {
+            display: flex;
+            align-items: baseline;
+            gap: 0.4rem;
+        }
+
+        .linea__clave { text-transform: uppercase; white-space: nowrap; }
+
+        .linea__puntos {
+            flex: 1;
+            margin-bottom: 0.28em;
+            border-bottom: 1px dotted black;
+        }
+
+        .linea__valor {
+            max-width: 58%;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .linea--fuerte .linea__clave,
+        .linea--fuerte .linea__valor { font-weight: 700; }
+
+        .bloque__titulo {
+            margin: 0 0 0.5rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .vertidos {
+            margin: 0.5rem 0 0;
+            padding: 0.7rem 0.8rem;
+            border: 1px dashed black;
+            font-size: 0.78rem;
+        }
+
+        .vacio {
+            margin: 0;
+            padding: 0.9rem 0.5rem;
+            border: 1px dashed black;
+            font-size: 0.78rem;
+            text-align: center;
+        }
+
+        .barras {
+            height: 34px;
+            margin: 0.9rem 0 0.4rem;
+            background-image: repeating-linear-gradient(
+                90deg,
+                #000 0 2px, transparent 2px 5px,
+                #000 5px 6px, transparent 6px 10px,
+                #000 10px 13px, transparent 13px 15px
+            );
+        }
+
+        .boleta__pie {
+            margin: 0;
+            font-size: 0.66rem;
+            letter-spacing: 0.16em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .boleta__llamado {
+            margin: 0.5rem 0 0;
+            font-family: var(--titulo);
+            font-size: 1.25rem;
+            text-align: center;
+            color: var(--ladrillo);
+        }
+
+        /* ---------- Polaroid ---------- */
+
+        .polaroid {
+            position: absolute;
+            right: 10px;
+            bottom: -6px;
+            z-index: 2;
+            width: 124px;
+            margin: 0;
+            padding: 8px 8px 26px;
+            background-color: #ffffff;
+            box-shadow: 0 10px 20px rgba(43, 26, 16, 0.28);
+            transform: rotate(-5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .boleta:hover .polaroid { transform: rotate(-2deg) scale(1.04); }
+
+        .polaroid img,
+        .polaroid svg {
+            display: block;
+            width: 100%;
+            height: 96px;
+            object-fit: cover;
+            background-color: #f3efe6;
+        }
+
+        .polaroid__pie {
+            margin-top: 6px;
+            overflow: hidden;
+            font-family: var(--titulo);
+            font-size: 1rem;
+            line-height: 1.1;
+            text-align: center;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            color: var(--tinta);
+        }
+
+        /* ---------- Flechas del carrusel ---------- */
+
+        .flecha {
+            position: absolute;
+            top: 46%;
+            z-index: 4;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border: 1.5px solid var(--tinta);
+            border-radius: 50%;
+            background-color: var(--papel);
+            color: var(--tinta);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .flecha:hover { background-color: var(--tinta); color: var(--papel); }
+
+        .flecha--izq { left: -10px; }
+        .flecha--der { right: -10px; }
+
+        /* ==========================================================
+           5. MODAL
+           ========================================================== */
+
+        .modal {
+            width: min(92vw, 440px);
+            max-height: 90vh;
+            padding: 0;
+            border: 0;
+            background-color: transparent;
+            overflow: visible;   /* deja salir la Polaroid ampliada */
+        }
+
+        .modal::backdrop {
+            background-color: rgba(43, 26, 16, 0.62);
+            animation: velo 0.32s ease both;
+        }
+
+        .modal[open] { animation: entrar 0.34s cubic-bezier(0.2, 0.9, 0.25, 1); }
+
+        .modal.cerrando { animation: salir 0.22s ease-in both; }
+        .modal.cerrando::backdrop { animation: velo 0.22s ease reverse both; }
+
+        @keyframes entrar {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes salir {
+            to { opacity: 0; transform: translateY(12px) scale(0.97); }
+        }
+
+        @keyframes velo {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* Sin filter/transform aquí: la Polaroid ampliada usa position fixed */
+        .modal__caja {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal .boleta__hoja {
+            padding: 1.6rem 1.5rem 1.3rem;
+            font-size: 0.84rem;
+            box-shadow: none;
+        }
+
+        .modal .boleta__dentado { filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.3)); }
+
+        .modal .boleta__marca { font-size: 1rem; }
+
+        /* Polaroid dentro del modal: vuelve al flujo y es ampliable */
+        .modal .polaroid {
+            position: static;
+            width: 172px;
+            margin: 1.4rem auto 0.4rem;
+            padding: 10px 10px 34px;
+            transform: rotate(-3deg);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1),
+                        box-shadow 0.3s ease;
+        }
+
+        .modal .polaroid img,
+        .modal .polaroid svg { height: 132px; }
+
+        .polaroid--zoom { cursor: zoom-in; }
+
+        .polaroid--zoom:hover {
+            transform: rotate(-1deg) scale(1.07);
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.38);
+        }
+
+        /* Lupa: al enfocar, la foto se centra en pantalla sobre el modal */
+        .modal .polaroid--zoom:focus {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            z-index: 10;
+            width: min(80vw, 380px);
+            margin: 0;
+            outline: none;
+            cursor: zoom-out;
+            transform: translate(-50%, -50%) rotate(0deg);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55);
+        }
+
+        .modal .polaroid--zoom:focus img,
+        .modal .polaroid--zoom:focus svg { height: min(52vh, 300px); }
+
+        .polaroid--zoom:focus::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-color: rgba(43, 26, 16, 0.6);
+            pointer-events: none;
+        }
+
+        .polaroid__ayuda {
+            display: none;
+            margin: 4px 0 0;
+            font-family: var(--texto);
+            font-size: 0.6rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-align: center;
+            color: var(--tinta-suave);
+        }
+
+        .polaroid--zoom:focus .polaroid__ayuda { display: block; }
+
+        .cerrar {
+            display: block;
+            width: 100%;
+            margin-top: 0.9rem;
+            padding: 0.6rem;
+            border: 1px dashed black;
+            background-color: transparent;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .cerrar:hover { background-color: #000; color: #fff; }
+
+        /* ---------- Catálogo vacío ---------- */
+
+        .sin-granos {
+            flex: 1 0 auto;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            border: 1px dashed var(--linea);
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        /* ==========================================================
+           RESPONSIVO / ACCESIBILIDAD
+           ========================================================== */
+
+        @media (max-width: 720px) {
+            .flecha { display: none; }
+
+            .modal .boleta__hoja { padding: 1.3rem 1.1rem 1rem; font-size: 0.8rem; }
+
+            .linea__valor { max-width: 52%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .carrusel { scroll-behavior: auto; }
+
+            .tetera,
+            .chorro,
+            .goteo,
+            .vapor { animation: none; }
+
+            .vapor { opacity: 0.5; }
+
+            .boleta:hover,
+            .boleta:focus-visible { animation: none; }
+
+            .polaroid,
+            .modal[open],
+            .modal.cerrando { transition: none; animation: none; }
+        }
+
+        {% block estilos %}{% endblock %}
+    </style>
+</head>
+<body>
+
+    {% block contenido %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

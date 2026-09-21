@@ -1,0 +1,47 @@
+{% comment %}
+Modal con la boleta técnica completa de un café y todas sus recetas.
+
+Parámetros: cafe (objeto Cafe).
+{% endcomment %}
+<dialog class="modal" id="receta-{{ cafe.id }}" aria-label="Receta V60 de {{ cafe.nombre }}">
+    <div class="modal__caja">
+        <div class="boleta__dentado boleta__dentado--arriba"></div>
+
+        <div class="boleta__hoja">
+            <p class="boleta__marca">{{ cafe.tostador }}</p>
+            <p class="boleta__sub">Hario V60 · Receta técnica</p>
+
+            <hr class="corte">
+
+            {% include 'cafes/partials/_linea.html' with clave="Lote" valor=cafe.nombre only %}
+            {% include 'cafes/partials/_linea.html' with clave="Origen" valor=cafe.origen only %}
+
+            <hr class="corte">
+
+            {% if cafe.recetas.all %}
+                {% for receta in cafe.recetas.all %}
+                    {% include 'cafes/partials/_receta.html' with receta=receta numero=forloop.counter only %}
+                    {% if not forloop.last %}<hr class="corte corte--doble">{% endif %}
+                {% endfor %}
+
+                <hr class="corte corte--doble">
+
+                {% include 'cafes/partials/_linea.html' with clave="Total recetas" valor=cafe.recetas.all|length only %}
+            {% else %}
+                <p class="vacio">
+                    Aún no hay recetas para este grano.<br>
+                    ¡Sé el primero en experimentar!
+                </p>
+            {% endif %}
+
+            {% include 'cafes/partials/_polaroid.html' with cafe=cafe pie=cafe.nombre ampliable=True only %}
+
+            <div class="barras" aria-hidden="true"></div>
+            <p class="boleta__pie">Gracias por tostar local</p>
+
+            <button class="cerrar" type="button" data-cerrar>Cerrar boleta</button>
+        </div>
+
+        <div class="boleta__dentado"></div>
+    </div>
+</dialog>

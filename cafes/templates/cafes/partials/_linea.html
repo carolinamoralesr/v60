@@ -1,0 +1,15 @@
+{% comment %}
+Línea de boleta reutilizable: clave a la izquierda, valor a la derecha
+unidos por una guía punteada.
+
+Parámetros (se incluyen siempre con `only`):
+  clave     texto del concepto.
+  valor     dato a mostrar.
+  unidad    (opcional) sufijo de la unidad de medida.
+  destacada (opcional) si es True, imprime la línea en negrita.
+{% endcomment %}
+<div class="linea{% if destacada %} linea--fuerte{% endif %}">
+    <span class="linea__clave">{{ clave }}</span>
+    <span class="linea__puntos"></span>
+    <span class="linea__valor">{{ valor }}{% if unidad %} {{ unidad }}{% endif %}</span>
+</div>
