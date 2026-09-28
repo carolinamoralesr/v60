@@ -132,12 +132,11 @@ generaron con IA y se adaptaron a mano (indicador 10).
         <p class="seccion__rotulo">Catálogo de granos</p>
         <h2 class="seccion__titulo">Lo que hay hoy en la barra</h2>
 
-        {# Formulario GET: los filtros viajan en la URL, son compartibles y no
-           modifican datos, por eso no requiere token CSRF. #}
+        {% comment %}GET: el filtro va en la URL y no modifica datos; no lleva CSRF.{% endcomment %}
         <form class="buscador" method="get" action="{% url 'cafes:catalogo' %}" role="search">
-            <label class="seccion__rotulo" for="q" style="margin: 0;">Buscar</label>
+            <label class="visually-hidden" for="q">Buscar lote, tostaduría u origen</label>
             <input class="buscador__campo" type="search" id="q" name="q"
-                   value="{{ busqueda }}" placeholder="Lote, tostaduría u origen">
+                   value="{{ busqueda }}" placeholder="Buscar lote, tostaduría u origen">
             <button class="buscador__boton" type="submit">Filtrar</button>
             {% if busqueda %}
                 <a class="buscador__limpiar" href="{% url 'cafes:catalogo' %}">Limpiar</a>

@@ -15,6 +15,7 @@ Criterio de tipos de dato aplicado en todo el archivo:
 
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -72,6 +73,21 @@ class Receta(models.Model):
         default="Anónimo",
         help_text="Barista que firma la receta.",
     )
+    # Dueño de la receta: permite el CRUD protegido por sesión (indicador 5).
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='recetas_creadas',
+        help_text="Usuario autenticado que cargó la receta.",
+    )
+    publicada = models.BooleanField(
+        default=True,
+        help_text="Si está desmarcada, la receta no aparece en el catálogo público.",
+    )
+    creado_en = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    actualizado_en = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     # --- Dosis y agua ---
     gramos_cafe = models.DecimalField(
@@ -139,9 +155,18 @@ class Receta(models.Model):
         verbose_name = "receta"
         verbose_name_plural = "recetas"
         ordering = ['cafe', 'autor']
+        permissions = [
+            ('publicar_receta', 'Puede publicar recetas en el catálogo'),
+        ]
 
     def __str__(self):
         return f"Receta V60 de {self.autor} para {self.cafe.nombre}"
+
+    def puede_gestionar(self, usuario):
+        """True si el usuario autenticado es el dueño o es staff."""
+        if not usuario.is_authenticated:
+            return False
+        return usuario.is_staff or self.creado_por_id == usuario.id
 
     @property
     def ratio_calculado(self):

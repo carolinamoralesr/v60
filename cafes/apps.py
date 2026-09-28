@@ -2,4 +2,6 @@ from django.apps import AppConfig
 
 
 class CafesConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
     name = 'cafes'
+    verbose_name = 'Cafés y recetas V60'

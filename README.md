@@ -42,10 +42,12 @@ backend/
 ├── catalogo_cafe/          # Configuración del proyecto (settings, urls, wsgi)
 ├── cafes/                  # App principal
 │   ├── models.py           # Capa Model (MVC)
-│   ├── views.py            # Capa Controlador (MVC) / View (MVT)
-│   ├── urls.py             # Despachador de la app (app_name = 'cafes')
-│   ├── admin.py            # Panel de administración con inline de recetas
-│   ├── tests.py            # Validación de los datos e interfaz generados con IA
+│   ├── forms.py            # ModelForm del CRUD (validación)
+│   ├── mixins.py           # Login, dueño de receta y staff
+│   ├── views.py            # Catálogo + CBV del CRUD
+│   ├── urls.py             # Catálogo, auth y recetas
+│   ├── admin.py            # Admin extendido (colecciones)
+│   ├── tests.py            # Fixture, catálogo, sesiones y CRUD
 │   └── templates/          # Capa Vista (MVC) / Template (MVT)
 │       ├── base.html
 │       └── cafes/
@@ -202,10 +204,78 @@ El catálogo queda disponible en <http://127.0.0.1:8000/>.
 ### Comandos adicionales
 
 ```bash
-python manage.py test              # Valida los datos e interfaz generados con IA
+python manage.py test              # Valida fixture, catálogo, sesiones y CRUD
 python manage.py check             # Valida la configuración
-python manage.py createsuperuser   # Crea un usuario para /admin/
+python manage.py createsuperuser   # Usuario staff para /admin/ y alta de cafés
 ```
+
+## Evaluación 2 · Admin, CRUD y sesiones (Destacado)
+
+Esta unidad exige **gestión de colecciones**, **CRUD propio** y **manejo de sesiones**.
+El catálogo público sigue siendo de solo lectura; escribir en la base exige login.
+
+### Indicador 1 · Base de datos
+
+El motor y las credenciales salen del `.env` (`DB_ENGINE`, `DB_NAME`, `DB_USER`,
+`DB_PASSWORD`, `DB_HOST`, `DB_PORT`). En local el default es SQLite; en un PaaS se
+cambia a PostgreSQL sin tocar `settings.py`. `ATOMIC_REQUESTS = True` envuelve cada
+petición en una transacción (persistencia segura). Las sesiones se guardan en la
+tabla `django_session` de esa misma base.
+
+### Indicador 2 · Django Admin extendido
+
+`/admin/` gestiona las colecciones `Cafe` y `Receta` con:
+
+- `inlines` de recetas en cada café
+- `fieldsets`, `autocomplete_fields`, `list_editable` (temperatura y publicada)
+- acciones masivas **Publicar** / **Ocultar**
+- `save_model` que asigna `creado_por` al usuario logueado
+- `ratio_calculado` como campo de solo lectura
+
+### Indicador 3 · CRUD
+
+| Operación | Quién | Ruta |
+| --- | --- | --- |
+| Create receta | Barista autenticado | `/recetas/nueva/` |
+| Read | Barista: `/recetas/` · Público: catálogo | |
+| Update | Dueño o staff | `/recetas/<id>/editar/` |
+| Delete | Dueño o staff | `/recetas/<id>/eliminar/` |
+| Create café (colección) | Solo staff | `/cafes/nuevo/` |
+
+Los formularios viven en `cafes/forms.py` (validación de ratio, tiempo y bloom).
+Las vistas de escritura usan `transaction.atomic` y capturan `IntegrityError`.
+
+### Indicador 4 · Backend modular y seguridad
+
+- Mixins en `cafes/mixins.py` (`LoginRequiredMixin`, dueño, staff)
+- CSRF en todo POST (incluido el logout)
+- `SECRET_KEY` y `DEBUG` fuera del código
+- Mensajes flash con `django.contrib.messages`
+
+### Indicador 5 · Sesiones, autenticación y roles
+
+- Login `/ingresar/` y logout por POST
+- Registro `/registro/` que asigna el grupo **Baristas**
+- Anónimo: solo el catálogo. Barista: CRUD de **sus** recetas. Staff: Admin + alta de cafés + todas las recetas
+- `SESSION_COOKIE_AGE = 3600`, `SESSION_EXPIRE_AT_BROWSER_CLOSE = True`, cookie `HttpOnly` y `SameSite=Lax`
+- Recetas con `publicada=False` no salen en el catálogo público
+
+### Indicador 6 · Uso de IA (esta unidad)
+
+| Artefacto | Qué hizo la IA | Qué se adaptó / rechazó | Validación |
+| --- | --- | --- | --- |
+| Formularios y plantillas de login/CRUD | Maquetó las pantallas | Se exigió CSRF, `novalidate` solo visual, y logout por POST (Django 5+) | Tests de 302 al login y 403 al editar receta ajena |
+| Vistas CBV | Propuso `CreateView` sin dueño | Se añadió `RecetaOwnerMixin` y `transaction.atomic` | `RecetaCrudTest` |
+| Admin | Registro plano de modelos | Se extendió con fieldsets, acciones y `save_model` | Se abre `/admin/` con superusuario |
+
+### Cómo probarlo en local
+
+1. `python manage.py migrate` (crea el grupo Baristas)
+2. `python manage.py loaddata datos.json`
+3. `python manage.py createsuperuser` → entra a `/admin/`
+4. En `/registro/` crea un barista y publica una receta en `/recetas/nueva/`
+5. Cierra el navegador: la sesión caduca (`SESSION_EXPIRE_AT_BROWSER_CLOSE`)
+
 
 ## Uso de inteligencia artificial (indicador 10)
 

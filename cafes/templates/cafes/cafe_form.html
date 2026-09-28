@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Nuevo café · Catálogo V60{% endblock %}
+
+{% block contenido %}
+<section class="panel">
+    <p class="seccion__rotulo">Colección</p>
+    <h1 class="seccion__titulo">Agregar café</h1>
+    <p>Solo el personal (staff) puede ampliar la colección de lotes. Las recetas las publican los baristas.</p>
+    <form class="formulario" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.as_p }}
+        <div class="formulario__acciones">
+            <button class="barra__boton" type="submit">Guardar café</button>
+            <a class="barra__enlace" href="{% url 'cafes:catalogo' %}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

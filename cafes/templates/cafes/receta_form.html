@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo_formulario }} · Catálogo V60{% endblock %}
+
+{% block contenido %}
+<section class="panel">
+    <p class="seccion__rotulo">CRUD · Receta</p>
+    <h1 class="seccion__titulo">{{ titulo_formulario }}</h1>
+    <form class="formulario" method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.as_p }}
+        <div class="formulario__acciones">
+            <button class="barra__boton" type="submit">Guardar</button>
+            <a class="barra__enlace" href="{% url 'cafes:mis_recetas' %}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

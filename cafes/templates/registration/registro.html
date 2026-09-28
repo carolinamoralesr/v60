@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Registro barista · Catálogo V60{% endblock %}
+
+{% block contenido %}
+<section class="panel">
+    <p class="seccion__rotulo">Rol Baristas</p>
+    <h1 class="seccion__titulo">Crear cuenta</h1>
+    <p>Al registrarte entras al grupo <strong>Baristas</strong> y puedes publicar, editar y borrar tus propias recetas V60.</p>
+    <form class="formulario" method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="formulario__acciones">
+            <button class="barra__boton" type="submit">Registrarme</button>
+            <a class="barra__enlace" href="{% url 'cafes:login' %}">Ya tengo cuenta</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Mis recetas V60{% endblock %}
+
+{% block contenido %}
+<section class="seccion panel panel--ancho" style="margin-top: 2.5rem;">
+    <p class="seccion__rotulo">CRUD · Leer</p>
+    <h1 class="seccion__titulo">Mis recetas</h1>
+    <div class="formulario__acciones" style="margin-bottom: 1.2rem;">
+        <a class="barra__enlace" href="{% url 'cafes:receta_crear' %}">Nueva receta</a>
+        {% if user.is_staff %}
+            <a class="barra__enlace" href="{% url 'cafes:cafe_crear' %}">Nuevo café</a>
+        {% endif %}
+    </div>
+
+    {% if recetas %}
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th>Café</th>
+                    <th>Autor</th>
+                    <th>Ratio</th>
+                    <th>Temp.</th>
+                    <th>Visible</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receta in recetas %}
+                    <tr>
+                        <td>{{ receta.cafe.nombre }}</td>
+                        <td>{{ receta.autor }}</td>
+                        <td>{{ receta.ratio }}</td>
+                        <td>{{ receta.temperatura }} °C</td>
+                        <td>{% if receta.publicada %}Sí{% else %}No{% endif %}</td>
+                        <td>
+                            <a href="{% url 'cafes:receta_editar' receta.pk %}">Editar</a>
+                            ·
+                            <a href="{% url 'cafes:receta_eliminar' receta.pk %}">Eliminar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aún no cargas recetas. Publica la primera desde el botón de arriba.</p>
+    {% endif %}
+</section>
+{% endblock %}

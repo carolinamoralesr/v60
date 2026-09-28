@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Eliminar receta · Catálogo V60{% endblock %}
+
+{% block contenido %}
+<section class="panel">
+    <p class="seccion__rotulo">CRUD · Eliminar</p>
+    <h1 class="seccion__titulo">¿Borrar esta receta?</h1>
+    <p>Se eliminará la receta de <strong>{{ object.autor }}</strong> para <strong>{{ object.cafe }}</strong>. Esta acción no se puede deshacer.</p>
+    <form class="formulario" method="post">
+        {% csrf_token %}
+        <div class="formulario__acciones">
+            <button class="barra__boton" type="submit">Sí, eliminar</button>
+            <a class="barra__enlace" href="{% url 'cafes:mis_recetas' %}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

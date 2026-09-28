@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Ingresar · Catálogo V60{% endblock %}
+
+{% block contenido %}
+<section class="panel">
+    <p class="seccion__rotulo">Sesión</p>
+    <h1 class="seccion__titulo">Ingresar</h1>
+    <p>El CRUD de recetas exige una sesión autenticada. El catálogo público sigue abierto.</p>
+    <form class="formulario" method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="formulario__acciones">
+            <button class="barra__boton" type="submit">Entrar</button>
+            <a class="barra__enlace" href="{% url 'cafes:registro' %}">Crear cuenta barista</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

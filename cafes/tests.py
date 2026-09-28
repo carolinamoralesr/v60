@@ -11,6 +11,8 @@ el catálogo responde como se espera. Cubren dos frentes:
 
 import re
 
+from django.conf import settings
+from django.contrib.auth.models import Group, User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -94,9 +96,17 @@ class CatalogoVistaTest(TestCase):
         self.assertEqual(respuesta.context['total_recetas'], 7)
 
     def test_evita_el_problema_n_mas_1(self):
-        """Dos consultas: una de cafés y una de recetas, gracias al prefetch."""
-        with self.assertNumQueries(2):
+        """Dos consultas de datos (café + recetas). Los SAVEPOINT extra son ATOMIC_REQUESTS."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
             self.client.get(reverse('cafes:catalogo'))
+        datos = [
+            q['sql'] for q in ctx.captured_queries
+            if 'SAVEPOINT' not in q['sql'] and 'RELEASE' not in q['sql']
+        ]
+        self.assertEqual(len(datos), 2)
 
     def test_filtro_get_por_origen(self):
         respuesta = self.client.get(reverse('cafes:catalogo'), {'q': 'guatemala'})
@@ -117,3 +127,149 @@ class CatalogoVistaTest(TestCase):
         )
         respuesta = self.client.get(reverse('cafes:catalogo'), {'q': 'experimental'})
         self.assertContains(respuesta, '¡Sé el primero en experimentar!')
+
+
+class AutenticacionYSesionTest(TestCase):
+    """Indicadores 4 y 5: rutas protegidas y cookie de sesión HttpOnly."""
+
+    def setUp(self):
+        self.grupo = Group.objects.get_or_create(name='Baristas')[0]
+        self.barista = User.objects.create_user('barista', password='ClaveSegura123')
+        self.barista.groups.add(self.grupo)
+
+    def test_anonimo_no_entra_al_crud(self):
+        respuesta = self.client.get(reverse('cafes:receta_crear'))
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertIn(reverse('cafes:login'), respuesta.url)
+
+    def test_login_crea_sesion_httponly(self):
+        respuesta = self.client.post(
+            reverse('cafes:login'),
+            {'username': 'barista', 'password': 'ClaveSegura123'},
+        )
+        self.assertEqual(respuesta.status_code, 302)
+        cookie = respuesta.cookies.get('sessionid')
+        self.assertIsNotNone(cookie)
+        self.assertTrue(cookie['httponly'])
+        self.assertTrue(settings.SESSION_EXPIRE_AT_BROWSER_CLOSE)
+        self.assertEqual(settings.SESSION_COOKIE_AGE, 3600)
+
+    def test_registro_asigna_grupo_baristas(self):
+        respuesta = self.client.post(reverse('cafes:registro'), {
+            'username': 'nueva',
+            'password1': 'ClaveSegura123',
+            'password2': 'ClaveSegura123',
+        })
+        self.assertEqual(respuesta.status_code, 302)
+        usuario = User.objects.get(username='nueva')
+        self.assertTrue(usuario.groups.filter(name='Baristas').exists())
+
+
+class RecetaCrudTest(TestCase):
+    """Indicador 3: Create, Read, Update, Delete con dueño y validación."""
+
+    fixtures = ['datos.json']
+
+    def setUp(self):
+        self.grupo = Group.objects.get_or_create(name='Baristas')[0]
+        self.dueno = User.objects.create_user('dueno', password='ClaveSegura123')
+        self.otro = User.objects.create_user('otro', password='ClaveSegura123')
+        self.dueno.groups.add(self.grupo)
+        self.otro.groups.add(self.grupo)
+        self.cafe = Cafe.objects.first()
+
+    def _datos_receta(self, **extra):
+        datos = {
+            'cafe': self.cafe.pk,
+            'autor': 'Dueno',
+            'gramos_cafe': '15.0',
+            'agua_total': 240,
+            'ratio': '1:16',
+            'temperatura': 92,
+            'molienda': 'Media',
+            'molino': 'Comandante C40',
+            'clicks_molino': 26,
+            'bloom_agua': 45,
+            'bloom_segundos': 40,
+            'vertidos': '0:00 45g, 0:40 240g',
+            'tiempo_total': '3:00',
+            'publicada': True,
+        }
+        datos.update(extra)
+        return datos
+
+    def test_crear_receta_autenticado(self):
+        self.client.login(username='dueno', password='ClaveSegura123')
+        respuesta = self.client.post(reverse('cafes:receta_crear'), self._datos_receta())
+        self.assertEqual(respuesta.status_code, 302)
+        receta = Receta.objects.get(autor='Dueno', creado_por=self.dueno)
+        self.assertEqual(receta.cafe, self.cafe)
+
+    def test_bloom_invalido_no_se_guarda(self):
+        self.client.login(username='dueno', password='ClaveSegura123')
+        respuesta = self.client.post(
+            reverse('cafes:receta_crear'),
+            self._datos_receta(bloom_agua=10),
+        )
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(Receta.objects.filter(autor='Dueno', creado_por=self.dueno).exists())
+
+    def test_otro_usuario_no_edita(self):
+        receta = Receta.objects.create(
+            cafe=self.cafe,
+            autor='Dueno',
+            creado_por=self.dueno,
+            gramos_cafe='15.0',
+            agua_total=240,
+            ratio='1:16',
+            temperatura=92,
+            molienda='Media',
+            clicks_molino=26,
+            bloom_agua=45,
+            bloom_segundos=40,
+            tiempo_total='3:00',
+        )
+        self.client.login(username='otro', password='ClaveSegura123')
+        respuesta = self.client.post(
+            reverse('cafes:receta_editar', args=[receta.pk]),
+            self._datos_receta(autor='Intruso'),
+        )
+        self.assertEqual(respuesta.status_code, 403)
+        receta.refresh_from_db()
+        self.assertEqual(receta.autor, 'Dueno')
+
+    def test_dueno_elimina(self):
+        receta = Receta.objects.create(
+            cafe=self.cafe,
+            autor='Dueno',
+            creado_por=self.dueno,
+            gramos_cafe='15.0',
+            agua_total=240,
+            ratio='1:16',
+            temperatura=92,
+            molienda='Media',
+            clicks_molino=26,
+            bloom_agua=45,
+            bloom_segundos=40,
+            tiempo_total='3:00',
+        )
+        self.client.login(username='dueno', password='ClaveSegura123')
+        respuesta = self.client.post(reverse('cafes:receta_eliminar', args=[receta.pk]))
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertFalse(Receta.objects.filter(pk=receta.pk).exists())
+
+    def test_staff_crea_cafe(self):
+        User.objects.create_user('jefe', password='ClaveSegura123', is_staff=True)
+        self.client.login(username='jefe', password='ClaveSegura123')
+        respuesta = self.client.post(reverse('cafes:cafe_crear'), {
+            'nombre': 'Lote Staff',
+            'tostador': 'Tostaduría Staff',
+            'origen': 'Putaendo, Chile',
+        })
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertTrue(Cafe.objects.filter(nombre='Lote Staff').exists())
+
+    def test_barista_no_crea_cafe(self):
+        self.client.login(username='dueno', password='ClaveSegura123')
+        respuesta = self.client.get(reverse('cafes:cafe_crear'))
+        self.assertEqual(respuesta.status_code, 403)

@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cafes',
+        'cafes.apps.CafesConfig',
 ]
 
 MIDDLEWARE = [
@@ -74,11 +74,30 @@ WSGI_APPLICATION = 'catalogo_cafe.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+#
+# Motor y credenciales salen del .env: en local SQLite (cero instalación) y
+# en un PaaS se apunta a PostgreSQL sin tocar este archivo. ATOMIC_REQUESTS
+# envuelve cada petición en una transacción: si la vista falla, no queda
+# un receta a medias. Las sesiones de django.contrib.sessions también se
+# persisten en esta misma base (tabla django_session).
+
+_db_engine = config('DB_ENGINE', default='django.db.backends.sqlite3')
+_db_name = config('DB_NAME', default='')
+if not _db_name:
+    _db_name = str(BASE_DIR / 'db.sqlite3')
+elif _db_engine.endswith('sqlite3') and not Path(_db_name).is_absolute():
+    _db_name = str(BASE_DIR / _db_name)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': _db_engine,
+        'NAME': _db_name,
+        'USER': config('DB_USER', default=''),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default=''),
+        'PORT': config('DB_PORT', default=''),
+        'ATOMIC_REQUESTS': True,
+        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=0, cast=int),
     }
 }
 
@@ -132,3 +151,23 @@ STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# Autenticación y sesiones
+# https://docs.djangoproject.com/en/6.1/topics/auth/default/
+# https://docs.djangoproject.com/en/6.1/topics/http/sessions/
+
+LOGIN_URL = 'cafes:login'
+LOGIN_REDIRECT_URL = 'cafes:mis_recetas'
+LOGOUT_REDIRECT_URL = 'cafes:catalogo'
+
+# La sesión vive 1 hora de inactividad y se destruye al cerrar el navegador.
+# HttpOnly impide que JavaScript lea la cookie; SameSite=Lax mitiga CSRF.
+SESSION_COOKIE_AGE = 60 * 60
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = not DEBUG
